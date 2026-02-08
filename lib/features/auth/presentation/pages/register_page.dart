@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dev_nexus/core/auth_service.dart';
 import 'dart:math' as math;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,7 +13,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isAgreed = false;
   bool _isLoading = false;
@@ -29,15 +30,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  //  منطق التسجيل (بدون أي تعديل)
-  void _handleSignUp() async {
+  Future<void> _handleSignUp() async {
     if (_passwordController.text != _confirmPasswordController.text) {
       _showSnackBar("Passwords do not match!");
       return;
     }
 
-    if (_emailController.text.isEmpty || 
-        _nameController.text.isEmpty || 
+    if (_emailController.text.isEmpty ||
+        _nameController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       _showSnackBar("Please fill in all fields");
       return;
@@ -50,19 +50,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    final result = await AuthService().signUp(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      name: _nameController.text.trim(),
-    );
+    String result;
 
-    setState(() => _isLoading = false);
+    try {
+      final email = _emailController.text.trim();
+      final pass = _passwordController.text.trim();
+      final name = _nameController.text.trim();
+
+      // ✅ Create account
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: pass,
+      );
+
+      // ✅ Save display name
+      await cred.user!.updateDisplayName(name);
+
+      // ✅ Force refresh (important on web)
+      await cred.user!.reload();
+
+      result = "success";
+    } on FirebaseAuthException catch (e) {
+      // ✅ Clear error messages
+      result = switch (e.code) {
+        'email-already-in-use' => 'This email is already in use.',
+        'invalid-email' => 'Invalid email address.',
+        'weak-password' => 'Password is too weak.',
+        'operation-not-allowed' => 'Email/password sign-in is not enabled.',
+        _ => e.message ?? 'Sign up failed.',
+      };
+    } catch (e) {
+      result = "Sign up failed: $e";
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+
+    if (!mounted) return;
 
     if (result == "success") {
       _showSnackBar("Account created successfully!");
-      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, '/home'); // أو '/login'
     } else {
-      _showSnackBar(result ?? "An error occurred");
+      _showSnackBar(result);
     }
   }
 
@@ -79,13 +108,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          /// الخلفيه
           Positioned.fill(
             child: CustomPaint(
               painter: _ElectronicThreadsPainter(),
             ),
           ),
-
           Center(
             child: SingleChildScrollView(
               child: Padding(
@@ -108,7 +135,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          
                           Image.asset(
                             'assets/image/logo.png',
                             height: 200,
@@ -127,9 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 28),
-
                           const Text(
                             "Create New Account",
                             textAlign: TextAlign.center,
@@ -140,25 +164,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               letterSpacing: 0.3,
                             ),
                           ),
-
                           const SizedBox(height: 42),
-
                           _inputField(
                             controller: _nameController,
                             hint: "Full name",
                             icon: Icons.person_outline,
                           ),
-
                           const SizedBox(height: 20),
-
                           _inputField(
                             controller: _emailController,
                             hint: "Email address",
                             icon: Icons.email_outlined,
                           ),
-
                           const SizedBox(height: 20),
-
                           _inputField(
                             controller: _passwordController,
                             hint: "Password",
@@ -172,9 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                             isObscured: _obscurePassword,
                           ),
-
                           const SizedBox(height: 20),
-
                           _inputField(
                             controller: _confirmPasswordController,
                             hint: "Confirm password",
@@ -183,15 +199,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             toggle: true,
                             onToggle: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                             isObscured: _obscureConfirmPassword,
                           ),
-
                           const SizedBox(height: 25),
-
-                          // اتفاقية الشروط والأحكام
                           Row(
                             children: [
                               Checkbox(
@@ -202,7 +216,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 onChanged: (value) {
                                   setState(() {
-                                    _isAgreed = value!;
+                                    _isAgreed = value ?? false;
                                   });
                                 },
                               ),
@@ -226,10 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 40),
-
-                          // زر التسجيل
                           SizedBox(
                             width: double.infinity,
                             height: 56,
@@ -263,10 +274,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                             ),
                           ),
-
                           const SizedBox(height: 28),
-
-                          // رابط العودة لتسجيل الدخول
                           TextButton(
                             onPressed: () => Navigator.pop(context),
                             child: const Text(
@@ -331,7 +339,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-
 class _ElectronicThreadsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -349,7 +356,6 @@ class _ElectronicThreadsPainter extends CustomPainter {
 
     final center = Offset(size.width / 2, size.height / 2);
 
-    //  (أقواس)
     for (int i = 0; i < 6; i++) {
       final radius = 120.0 + i * 70;
       final rect = Rect.fromCircle(center: center, radius: radius);
@@ -362,7 +368,6 @@ class _ElectronicThreadsPainter extends CustomPainter {
       );
     }
 
-    // مسارات منحنيةة
     for (int i = 0; i < 8; i++) {
       final path = Path()
         ..moveTo(

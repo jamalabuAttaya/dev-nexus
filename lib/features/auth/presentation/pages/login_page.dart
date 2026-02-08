@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'register_page.dart';
 import 'forgot_password_page.dart';
 import 'package:dev_nexus/core/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,27 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  Future<void> _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showSnackBar("Write your email first, then press Forgot Password");
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showSnackBar("Reset link sent to your email ✅");
+    } on FirebaseAuthException catch (e) {
+      String msg = "Failed to send reset email";
+
+      if (e.code == 'user-not-found') msg = "This email is not registered";
+      if (e.code == 'invalid-email') msg = "Invalid email format";
+      if (e.code == 'too-many-requests') msg = "Too many requests, try later";
+
+      _showSnackBar(msg);
+    }
+  }
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -44,8 +66,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result == "success") {
       _showSnackBar("Welcome back!");
-     
-  
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       _showSnackBar(result ?? "Login failed");
     }
@@ -65,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          ///  الخلفية 
+          ///  الخلفية
           Positioned.fill(
             child: CustomPaint(
               painter: _ElectronicThreadsPainter(),
@@ -94,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                         
                           Image.asset(
                             'assets/image/logo.png',
                             height: 200,
@@ -103,8 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Container(
                               height: 200,
                               decoration: BoxDecoration(
-                                color:
-                                    const Color(0xFF1A2E44).withOpacity(0.1),
+                                color: const Color(0xFF1A2E44).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Icon(
@@ -114,9 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 28),
-
                           const Text(
                             "Welcome to Dev Nexus",
                             textAlign: TextAlign.center,
@@ -127,17 +145,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               letterSpacing: 0.3,
                             ),
                           ),
-
                           const SizedBox(height: 42),
-
                           _inputField(
                             controller: _emailController,
                             hint: "Email address",
                             icon: Icons.email_outlined,
                           ),
-
                           const SizedBox(height: 20),
-
                           _inputField(
                             controller: _passwordController,
                             hint: "Password",
@@ -145,9 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             obscure: true,
                             toggle: true,
                           ),
-
                           const SizedBox(height: 40),
-
                           SizedBox(
                             width: double.infinity,
                             height: 56,
@@ -179,22 +191,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                             ),
                           ),
-
                           const SizedBox(height: 28),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ForgotPasswordScreen(),
-                                    ),
-                                  );
+                                  Navigator.pushNamed(
+                                      context, '/forgot-password');
                                 },
+                                // ✅ بدل الانتقال لصفحة
                                 child: const Text(
                                   "Forgot Password?",
                                   style: TextStyle(
@@ -277,7 +283,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-
 class _ElectronicThreadsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -295,7 +300,6 @@ class _ElectronicThreadsPainter extends CustomPainter {
 
     final center = Offset(size.width / 2, size.height / 2);
 
-    //  (أقواس)
     for (int i = 0; i < 6; i++) {
       final radius = 120.0 + i * 70;
       final rect = Rect.fromCircle(center: center, radius: radius);
@@ -308,7 +312,6 @@ class _ElectronicThreadsPainter extends CustomPainter {
       );
     }
 
-    // مسارات منحنيةة
     for (int i = 0; i < 8; i++) {
       final path = Path()
         ..moveTo(

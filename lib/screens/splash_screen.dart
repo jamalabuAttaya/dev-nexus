@@ -1,80 +1,43 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dev_nexus/screens/auth_wrapper.dart';
 
-// screens
-import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart';
-
-// auth pages
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/register_page.dart';
-import 'features/auth/presentation/pages/forgot_password_page.dart';
-
-class DevNexusApp extends StatelessWidget {
-  const DevNexusApp({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dev Nexus',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A2E44),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        fontFamily: 'Poppins',
-      ),
-
-      // ✅ أول صفحة
-      home: const SplashScreen(),
-
-      routes: {
-        '/auth': (context) => const AuthWrapper(),
-        '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
-    );
-  }
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _timer;
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        // ✅ هذا هو السبلاش الحقيقي أثناء فحص Firebase
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const AuthLoadingScreen();
-        }
+  void initState() {
+    super.initState();
 
-        if (snapshot.hasData) {
-          return const HomeScreen();
-        }
-
-        return const LoginScreen();
-      },
-    );
+    // ⏱️ بعد 3 ثواني يروح على صفحة Login
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/auth');
+    });
   }
-}
 
-class AuthLoadingScreen extends StatelessWidget {
-  const AuthLoadingScreen({super.key});
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A2E44),
+      backgroundColor: const Color(0xFF1A2E44), // كحلي غامق
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // 🔷 الشعار مع أنيميشن تكبير
             TweenAnimationBuilder<double>(
               duration: const Duration(seconds: 2),
               tween: Tween(begin: 0.9, end: 1.4),
@@ -93,10 +56,10 @@ class AuthLoadingScreen extends StatelessWidget {
                 width: 200,
                 height: 200,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF1A2E44),
-                      const Color(0xFF4DB6AC),
+                      Color(0xFF1A2E44),
+                      Color(0xFF4DB6AC),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -116,7 +79,7 @@ class AuthLoadingScreen extends StatelessWidget {
                     width: 100,
                     height: 100,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
+                    errorBuilder: (_, __, ___) => const Icon(
                       Icons.code,
                       size: 70,
                       color: Colors.white,
@@ -125,7 +88,10 @@ class AuthLoadingScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 70),
+
+            // 🔄 مؤشر التحميل
             SizedBox(
               height: 25,
               width: 25,
@@ -147,15 +113,15 @@ class AuthLoadingScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 35),
+
+            // 📝 النص
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 1500),
               tween: Tween(begin: 0.0, end: 1.0),
               builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: child,
-                );
+                return Opacity(opacity: value, child: child);
               },
               child: Column(
                 children: [

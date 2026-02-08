@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,37 +19,46 @@ class AuthService {
     required String name,
   }) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+      final result = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
       );
 
-      
-      await result.user!.updateDisplayName(name);
+      final uid = result.user?.uid;
+      if (uid == null) return "SIGNUP ERROR: uid-null";
 
-      // حفظ بيانات المستخدم في Firestore
-      await _firestore.collection('users').doc(result.user!.uid).set({
-        'uid': result.user!.uid,
-        'name': name,
-        'email': email,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      // تحديث الاسم (اختياري)
+      try {
+        await result.user!.updateDisplayName(name.trim());
+      } catch (e) {
+        debugPrint("⚠️ updateDisplayName failed: $e");
+      }
+
+      // حفظ بيانات المستخدم في Firestore (اختياري)
+      try {
+        await _firestore.collection('users').doc(uid).set({
+          'uid': uid,
+          'name': name.trim(),
+          'email': email.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      } on FirebaseException catch (e) {
+        debugPrint(
+            "❌ FIRESTORE ERROR | code: ${e.code} | message: ${e.message}");
+        // لا نوقف التسجيل
+      } catch (e) {
+        debugPrint("❌ FIRESTORE ERROR: $e");
+        // لا نوقف التسجيل
+      }
 
       return "success";
     } on FirebaseAuthException catch (e) {
-      return _handleAuthError(e.code);
+      debugPrint(
+          "❌ SIGNUP AUTH ERROR | code: ${e.code} | message: ${e.message}");
+      return "SIGNUP ERROR: ${e.code}";
     } catch (e) {
-      return "An unexpected error occurred";
-    }
-  }
-
-  // تسجيل دخول
-  Future<String?> login({required String email, required String password}) async {
-    try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return "success";
-    } on FirebaseAuthException catch (e) {
-      return _handleAuthError(e.code);
+      debugPrint("❌ SIGNUP ERROR: $e");
+      return "SIGNUP ERROR";
     }
   }
 
@@ -96,7 +106,8 @@ class AuthService {
   // الحصول على بيانات المستخدم من Firestore
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(uid).get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>;
       }
@@ -115,16 +126,36 @@ class AuthService {
     try {
       Map<String, dynamic> updateData = {'name': name};
       if (photoUrl != null) updateData['photoUrl'] = photoUrl;
-      
+
       await _firestore.collection('users').doc(uid).update(updateData);
-      
-     
+
       await _auth.currentUser?.updateDisplayName(name);
       if (photoUrl != null) {
         await _auth.currentUser?.updatePhotoURL(photoUrl);
       }
     } catch (e) {
       print("Error updating profile: $e");
+    }
+  }
+
+// تسجيل الدخول
+  Future<String?> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+      return "success";
+    } on FirebaseAuthException catch (e) {
+      debugPrint(
+          "❌ LOGIN AUTH ERROR | code: ${e.code} | message: ${e.message}");
+      return _handleAuthError(e.code);
+    } catch (e) {
+      debugPrint("❌ LOGIN ERROR: $e");
+      return "LOGIN ERROR";
     }
   }
 }

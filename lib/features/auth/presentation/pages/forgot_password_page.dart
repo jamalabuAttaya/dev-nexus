@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dev_nexus/core/auth_service.dart';
-import 'dart:math' as math;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -19,262 +18,160 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  // منطق إعادة تعيين كلمة المرور
-  void _handleResetPassword() async {
+  Future<void> _sendResetLink() async {
     final email = _emailController.text.trim();
 
+    // 1️⃣ تحقق من الإيميل
     if (email.isEmpty) {
-      _showSnackBar("Please enter your email address");
+      _showSnack("Please enter your email");
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final result = await AuthService().resetPassword(email);
+    try {
+      // 2️⃣ إرسال الرابط من Firebase
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-    setState(() => _isLoading = false);
+      if (!mounted) return;
 
-    if (result == "success") {
-      _showSnackBar("Reset link has been sent to your email!");
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) Navigator.pop(context);
-      });
-    } else {
-      _showSnackBar(result ?? "An error occurred");
+      // 3️⃣ رسالة نجاح
+      _showSnack("Reset link sent! Check Inbox/Spam.");
+
+      // 4️⃣ هنا بالضبط 👇
+      Navigator.pop(context); // 🔥 هذا مكانها الصحيح
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      _showSnack(e.message ?? "Failed to send reset email");
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(content: Text(msg)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      body: Stack(
-        children: [
-          ///  الخلفية الإلكترونية (نفس الخلفية تماماً)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _ElectronicThreadsPainter(),
-            ),
-          ),
-
-          Center(
-            child: SingleChildScrollView(
+      appBar: AppBar(
+        title: const Text("Forgot Password"),
+        backgroundColor: Colors.white,
+      ),
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: size.width > 500 ? 420 : size.width * 0.92,
-                  ),
-                  child: Card(
-                    elevation: 28,
-                    shadowColor: Colors.black.withOpacity(0.25),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 38,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.lock_reset,
+                        size: 50, color: Color(0xFF1A2E44)),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Reset your password",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1A2E44),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          
-                          const SizedBox(height: 30),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Enter your email and we'll send you a reset link.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-                          
-                          Image.asset(
-                            'assets/image/logo.png',
-                            height: 200,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                              height: 95,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1A2E44).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.lock_reset,
-                                color: Color(0xFF1A2E44),
-                                size: 50,
-                              ),
-                            ),
+                    // Email Field
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.grey[300]!),
+                        color: Colors.white,
+                      ),
+                      child: TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          hintText: "Email address",
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.email_outlined),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 18, horizontal: 16),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _sendResetLink,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1A2E44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
                           ),
-
-                          const SizedBox(height: 28),
-
-                          const Text(
-                            "Reset Your Password",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A2E44),
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-
-                          const SizedBox(height: 15),
-
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "Enter your registered email address below to receive your password reset link.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xFF607D8B),
-                                height: 1.5,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 42),
-
-                          ///  حقل الإيميل
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
-                            child: TextField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                hintText: 'Email address',
-                                border: InputBorder.none,
-                                prefixIcon: Icon(Icons.email_outlined,
-                                    color: Colors.grey[500]),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 18, horizontal: 16),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 40),
-
-                          /// زر إرسال رابط الإعادة
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed:
-                                  _isLoading ? null : _handleResetPassword,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1A2E44),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
                                 ),
-                                elevation: 8,
+                              )
+                            : const Text(
+                                "Send Reset Link",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5,
-                                      ),
-                                    )
-                                  : const Text(
-                                      "Send Reset Link",
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 28),
-
-                          ///  رابط العودة لتسجيل الدخول
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              "Back to Login",
-                              style: TextStyle(
-                                color: Color(0xFF4DB6AC),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
-                  ),
+
+                    const SizedBox(height: 10),
+
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        "Back to Login",
+                        style: TextStyle(
+                            color: Color(0xFF4DB6AC),
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
-
-///  الخلفيه
-class _ElectronicThreadsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final mainPaint = Paint()
-      ..color = const Color(0xFF1A2E44).withOpacity(0.06)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final accentPaint = Paint()
-      ..color = const Color(0xFF4DB6AC).withOpacity(0.08)
-      ..strokeWidth = 1.6
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final center = Offset(size.width / 2, size.height / 2);
-
-    //  (أقواس)
-    for (int i = 0; i < 6; i++) {
-      final radius = 120.0 + i * 70;
-      final rect = Rect.fromCircle(center: center, radius: radius);
-      canvas.drawArc(
-        rect,
-        math.pi * (0.2 * i),
-        math.pi * 1.3,
-        false,
-        accentPaint,
-      );
-    }
-
-    //مسارات منحنية ة
-    for (int i = 0; i < 8; i++) {
-      final path = Path()
-        ..moveTo(
-          size.width * math.Random(i).nextDouble(),
-          0,
-        )
-        ..cubicTo(
-          size.width * 0.2,
-          size.height * math.Random(i + 2).nextDouble(),
-          size.width * 0.8,
-          size.height * math.Random(i + 4).nextDouble(),
-          size.width * math.Random(i + 6).nextDouble(),
-          size.height,
-        );
-
-      canvas.drawPath(path, mainPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

@@ -1,12 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _fixOldUserNameIfNeeded();
+  }
+
+  Future<void> _fixOldUserNameIfNeeded() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final currentName = (user.displayName ?? '').trim();
+    if (currentName.isNotEmpty) return; // الاسم موجود خلاص
+
+    // توليد اسم تلقائي من الإيميل (قبل @)
+    final email = (user.email ?? '').trim();
+    final generatedName = email.contains('@') ? email.split('@').first : 'User';
+
+    try {
+      await user.updateDisplayName(generatedName);
+      await user.reload();
+
+      if (!mounted) return;
+      setState(() {}); // عشان يحدث الاسم على الشاشة
+    } catch (_) {
+      // تجاهل الخطأ (بدون تغيير UI)
+    }
+  }
 
   Future<void> _signOut(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
+
+      if (!context.mounted) return;
+
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error signing out: $e')),
@@ -17,7 +57,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userName = user?.displayName ?? 'User';
+    final userName = (user?.displayName ?? '').trim().isEmpty
+        ? 'User'
+        : user!.displayName!.trim();
     final userEmail = user?.email ?? '';
 
     return Scaffold(
@@ -26,15 +68,12 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           children: [
             const _BgPattern(),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 18),
-
-                  // Header 
                   Row(
                     children: [
                       Container(
@@ -66,7 +105,8 @@ class HomeScreen extends StatelessWidget {
                                     width: 80,
                                     height: 80,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0FA3A1).withOpacity(0.1),
+                                      color: const Color(0xFF0FA3A1)
+                                          .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Icon(
@@ -128,9 +168,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 26),
-
                   const Text(
                     "Welcome back",
                     style: TextStyle(
@@ -139,10 +177,7 @@ class HomeScreen extends StatelessWidget {
                       color: Color(0xFF0B1F2A),
                     ),
                   ),
-
                   const SizedBox(height: 32),
-
-                  // الأزرار الرئيسية)
                   _FeatureButton(
                     icon: Icons.menu_book_outlined,
                     title: "Digital Library",
@@ -160,10 +195,7 @@ class HomeScreen extends StatelessWidget {
                     title: "Learning Roadmaps",
                     onTap: () => Navigator.pushNamed(context, '/roadmaps'),
                   ),
-
                   const Spacer(),
-
-                  // بطاقة حالة الحساب )
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -202,8 +234,12 @@ class HomeScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
-                                user?.emailVerified == true ? Icons.verified : Icons.warning,
-                                color: user?.emailVerified == true ? Colors.green : Colors.orange,
+                                user?.emailVerified == true
+                                    ? Icons.verified
+                                    : Icons.warning,
+                                color: user?.emailVerified == true
+                                    ? Colors.green
+                                    : Colors.orange,
                                 size: 22,
                               ),
                             ),
@@ -213,11 +249,15 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    user?.emailVerified == true ? 'Email Verified' : 'Email Not Verified',
+                                    user?.emailVerified == true
+                                        ? 'Email Verified'
+                                        : 'Email Not Verified',
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
-                                      color: user?.emailVerified == true ? Colors.green : Colors.orange,
+                                      color: user?.emailVerified == true
+                                          ? Colors.green
+                                          : Colors.orange,
                                     ),
                                   ),
                                   if (userEmail.isNotEmpty) ...[
@@ -240,7 +280,6 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 18),
                 ],
               ),
@@ -252,7 +291,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
- 
 class _FeatureButton extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -317,7 +355,6 @@ class _FeatureButton extends StatelessWidget {
   }
 }
 
-
 class _BgPattern extends StatelessWidget {
   const _BgPattern();
 
@@ -335,7 +372,6 @@ class _BgPattern extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned(
             top: -70,
             right: -60,
