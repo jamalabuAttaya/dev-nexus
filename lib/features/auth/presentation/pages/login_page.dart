@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-
 import 'register_page.dart';
 import 'forgot_password_page.dart';
 import 'package:dev_nexus/core/auth_service.dart';
