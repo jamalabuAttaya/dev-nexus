@@ -6,7 +6,7 @@ import '../../domain/entities/roadmap_entity.dart';
 class RoadmapService {
   static const String _githubRaw = 'https://raw.githubusercontent.com/kamranahmedse/developer-roadmap/master/src/data/roadmaps';
 
-  /// جلب قائمة الخرائط
+  
   Future<List<Map<String, dynamic>>> fetchAllRoadmaps() async {
     try {
       final response = await http.get(
@@ -42,7 +42,7 @@ class RoadmapService {
     ];
   }
 
-  /// جلب تفاصيل خريطة محددة
+  
   Future<RoadmapEntity> fetchRoadmapDetail(String roadmapId) async {
     try {
       final response = await http.get(
@@ -62,7 +62,7 @@ class RoadmapService {
     }
   }
 
-  /// بيانات تفصيلية لكل خريطة - مكتملة 100%
+  
   RoadmapEntity _getDetailedRoadmap(String id) {
     switch (id) {
       case 'frontend':

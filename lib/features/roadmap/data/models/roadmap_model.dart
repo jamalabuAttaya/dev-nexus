@@ -17,7 +17,7 @@ class RoadmapModel {
     required this.nodes,
   });
 
-  /// تحويل JSON إلى Model
+  
   factory RoadmapModel.fromJson(Map<String, dynamic> json) {
     return RoadmapModel(
       id: json['id'] ?? '',
@@ -30,7 +30,7 @@ class RoadmapModel {
   }
   
 
-// دالة مساعدة لإنشاء Model من البيانات الافتراضية
+
 factory RoadmapModel.fromDefault(String id) {
   return RoadmapModel(
     id: id,
@@ -47,7 +47,7 @@ factory RoadmapModel.fromDefault(String id) {
    
 
 
-  /// تحويل Model إلى JSON (إذا احتجنا نرسل بيانات)
+ 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -59,9 +59,9 @@ factory RoadmapModel.fromDefault(String id) {
     };
   }
 
-  /// تحويل Model إلى Entity (للاستخدام في الـ UI)
+  
   RoadmapEntity toEntity() {
-    // تحويل الـ nodes إلى قائمة RoadmapNode
+    
     final nodeList = <RoadmapNode>[];
     
     if (nodes.isNotEmpty) {
@@ -78,7 +78,7 @@ factory RoadmapModel.fromDefault(String id) {
       });
     }
 
-    // تحديد مستوى الصعوبة والمدة بناءً على الـ nodes
+    
     final level = _determineLevel(nodeList.length);
     final duration = _determineDuration(nodeList.length);
 
@@ -94,14 +94,14 @@ factory RoadmapModel.fromDefault(String id) {
     );
   }
 
-  /// تحديد مستوى الصعوبة
+  
   String _determineLevel(int nodeCount) {
     if (nodeCount < 10) return 'Beginner';
     if (nodeCount < 20) return 'Intermediate';
     return 'Expert';
   }
 
-  /// تحديد المدة التقريبية
+ 
   String _determineDuration(int nodeCount) {
     final weeks = (nodeCount * 1.5).round();
     if (weeks < 4) return '$weeks weeks';
@@ -109,7 +109,7 @@ factory RoadmapModel.fromDefault(String id) {
     return '${(weeks / 4).round()}+ months';
   }
 
-  /// اختيار أيقونة مناسبة لكل خريطة
+  
   String _getIconForRoadmap(String id) {
     const icons = {
       'flutter': 'flutter_dash',
@@ -141,7 +141,7 @@ factory RoadmapModel.fromDefault(String id) {
     return icons[id] ?? 'map_rounded';
   }
 
-  /// استخراج جميع الموارد من الـ nodes
+ 
   List<String> _extractResources(List<RoadmapNode> nodes) {
     final resources = <String>[];
     for (var node in nodes) {

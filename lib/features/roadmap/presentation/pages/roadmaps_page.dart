@@ -262,12 +262,12 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     required String title,
     required String description,
   }) {
-    // ألوان مختلفة لكل خريطة
+   
     final Color cardColor = _getColorForRoadmap(id);
     
     return GestureDetector(
       onTap: () async {
-        // عرض مؤشر تحميل
+        
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -277,13 +277,13 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
         );
 
         try {
-          // جلب تفاصيل الخريطة
+          
           final roadmapDetail = await _roadmapService.fetchRoadmapDetail(id);
           
-          // إغلاق مؤشر التحميل
+          
           if (context.mounted) Navigator.pop(context);
           
-          // التنقل لصفحة التفاصيل
+          
           if (context.mounted) {
             Navigator.push(
               context,
@@ -294,7 +294,7 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
           }
         } catch (e) {
           if (context.mounted) {
-            Navigator.pop(context); // إغلاق مؤشر التحميل
+            Navigator.pop(context); 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('فشل تحميل تفاصيل الخريطة: $e'),
@@ -486,7 +486,7 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     );
   }
 
-  // دوال مساعدة للألوان والأيقونات
+  
   Color _getColorForRoadmap(String id) {
     switch (id.toLowerCase()) {
       case 'flutter':
@@ -585,10 +585,10 @@ class RoadmapDetailsPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Header مع معلومات الخريطة
+          
           _buildHeader(),
           
-          // قائمة الخطوات (Nodes)
+          
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -709,7 +709,7 @@ class RoadmapDetailsPage extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Theme(
-        // حل مشكلة الإشارة السوداء والصفراء
+        
         data: Theme.of(context).copyWith(
           dividerColor: Colors.transparent,
           unselectedWidgetColor: const Color(0xFF1976D2),
@@ -766,7 +766,7 @@ class RoadmapDetailsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    // ✅ الرابط يشتغل الآن
+           
                     GestureDetector(
                       onTap: () async {
                         final url = Uri.parse(node.resource!);
