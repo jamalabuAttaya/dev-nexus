@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:dev_nexus/screens/auth_wrapper.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // ⏱️ بعد 3 ثواني يروح على صفحة Login
+    
     _timer = Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/auth');
@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 🔷 الشعار مع أنيميشن تكبير
+            
             TweenAnimationBuilder<double>(
               duration: const Duration(seconds: 2),
               tween: Tween(begin: 0.9, end: 1.4),
@@ -67,7 +67,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 25,
                       offset: const Offset(0, 15),
                     ),
@@ -91,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: 70),
 
-            // 🔄 مؤشر التحميل
+           
             SizedBox(
               height: 25,
               width: 25,
@@ -116,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: 35),
 
-            // 📝 النص
+           
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 1500),
               tween: Tween(begin: 0.0, end: 1.0),
@@ -138,7 +139,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   Text(
                     'Elevating Developers Worldwide',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                       letterSpacing: 1,

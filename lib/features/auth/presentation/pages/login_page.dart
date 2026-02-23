@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'register_page.dart';
-import 'forgot_password_page.dart';
 import 'package:dev_nexus/core/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -15,28 +14,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  Future<void> _handleForgotPassword() async {
-    final email = _emailController.text.trim();
-
-    if (email.isEmpty) {
-      _showSnackBar("Write your email first, then press Forgot Password");
-      return;
-    }
-
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showSnackBar("Reset link sent to your email ✅");
-    } on FirebaseAuthException catch (e) {
-      String msg = "Failed to send reset email";
-
-      if (e.code == 'user-not-found') msg = "This email is not registered";
-      if (e.code == 'invalid-email') msg = "Invalid email format";
-      if (e.code == 'too-many-requests') msg = "Too many requests, try later";
-
-      _showSnackBar(msg);
-    }
-  }
-
   bool _isLoading = false;
   bool _obscurePassword = true;
 
@@ -47,35 +24,68 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  
+  Future<void> _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showSnackBar("Write your email first, then press Forgot Password");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showSnackBar("Reset link sent to your email ");
+    } on FirebaseAuthException catch (e) {
+      String msg = "Failed to send reset email";
+      if (e.code == 'user-not-found') msg = "This email is not registered";
+      if (e.code == 'invalid-email') msg = "Invalid email format";
+      if (e.code == 'too-many-requests') msg = "Too many requests, try later";
+      _showSnackBar(msg);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
       _showSnackBar("Please fill in all fields");
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final result = await AuthService().login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
+    try {
+      final result = await AuthService().login(
+        email: email,
+        password: password,
+      );
 
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (result == "success") {
-      _showSnackBar("Welcome back!");
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      _showSnackBar(result ?? "Login failed");
+
+      if (result == "success") {
+        _showSnackBar("Welcome back!");
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        _showSnackBar(result ?? "Login failed");
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _showSnackBar(String message) {
     if (!mounted) return;
+    ScaffoldMessenger.of(context).clearSnackBars(); 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -86,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          ///  الخلفية
+          // الخلفية
           Positioned.fill(
             child: CustomPaint(
               painter: _ElectronicThreadsPainter(),
@@ -103,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Card(
                     elevation: 28,
-                    shadowColor: Colors.black.withOpacity(0.25),
+                    shadowColor: Colors.black.withValues(alpha: 0.25), 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(32),
                     ),
@@ -117,13 +127,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Image.asset(
                             'assets/image/logo.png',
-                            height: 200,
+                            height: 150, 
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 Container(
-                              height: 200,
+                              height: 150,
+                              width: 150,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1A2E44).withOpacity(0.1),
+                                color: const Color(0xFF1A2E44).withValues(alpha: 0.1), 
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Icon(
@@ -149,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _emailController,
                             hint: "Email address",
                             icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
                           ),
                           const SizedBox(height: 20),
                           _inputField(
@@ -185,21 +197,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 17,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                             ),
                           ),
                           const SizedBox(height: 28),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 10,
                             children: [
                               TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/forgot-password');
-                                },
-                                // ✅ بدل الانتقال لصفحة
+                                onPressed: _handleForgotPassword,
                                 child: const Text(
                                   "Forgot Password?",
                                   style: TextStyle(
@@ -246,6 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
     required IconData icon,
     bool obscure = false,
     bool toggle = false,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -255,6 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: TextField(
         controller: controller,
         obscureText: obscure ? _obscurePassword : false,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           hintText: hint,
           border: InputBorder.none,
@@ -286,13 +298,13 @@ class _ElectronicThreadsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final mainPaint = Paint()
-      ..color = const Color(0xFF1A2E44).withOpacity(0.06)
+      ..color = const Color(0xFF1A2E44).withValues(alpha: 0.06) 
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     final accentPaint = Paint()
-      ..color = const Color(0xFF4DB6AC).withOpacity(0.08)
+      ..color = const Color(0xFF4DB6AC).withValues(alpha: 0.08) 
       ..strokeWidth = 1.6
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -311,18 +323,17 @@ class _ElectronicThreadsPainter extends CustomPainter {
       );
     }
 
+    
+    final random = math.Random(42); 
     for (int i = 0; i < 8; i++) {
       final path = Path()
-        ..moveTo(
-          size.width * math.Random(i).nextDouble(),
-          0,
-        )
+        ..moveTo(size.width * random.nextDouble(), 0)
         ..cubicTo(
           size.width * 0.2,
-          size.height * math.Random(i + 2).nextDouble(),
+          size.height * random.nextDouble(),
           size.width * 0.8,
-          size.height * math.Random(i + 4).nextDouble(),
-          size.width * math.Random(i + 6).nextDouble(),
+          size.height * random.nextDouble(),
+          size.width * random.nextDouble(),
           size.height,
         );
 

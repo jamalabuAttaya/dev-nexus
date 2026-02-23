@@ -3,7 +3,7 @@ class CourseEntity {
   final String title;
   final String instructor;
   final String thumbnailUrl;
-  final double progress; // نسبة التقدم 0.0 إلى 1.0
+  final double progress; 
 
   CourseEntity({
     required this.id,

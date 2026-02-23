@@ -26,9 +26,7 @@ class DevNexusApp extends StatelessWidget {
         fontFamily: 'Poppins',
       ),
 
-
       home: const SplashScreen(),
-
       
       routes: {
         '/auth': (context) => const AuthWrapper(),
@@ -41,7 +39,6 @@ class DevNexusApp extends StatelessWidget {
         '/roadmaps': (context) => const RoadmapsPage(),
       },
 
-      
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/courses':
@@ -59,7 +56,6 @@ class DevNexusApp extends StatelessWidget {
     );
   }
 }
-
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -80,7 +76,6 @@ class AuthWrapper extends StatelessWidget {
     );
   }
 }
-
 
 class AuthLoadingScreen extends StatelessWidget {
   const AuthLoadingScreen({super.key});
@@ -107,8 +102,8 @@ class AuthLoadingScreen extends StatelessWidget {
                 width: 200,
                 height: 200,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: const [
+                  gradient: const LinearGradient(
+                    colors: [
                       Color(0xFF1A2E44),
                       Color(0xFF4DB6AC),
                     ],
@@ -118,7 +113,8 @@ class AuthLoadingScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                     
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 25,
                       offset: const Offset(0, 15),
                     ),
@@ -180,7 +176,8 @@ class AuthLoadingScreen extends StatelessWidget {
                   Text(
                     'Elevating Developers Worldwide',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                     
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                       letterSpacing: 1,

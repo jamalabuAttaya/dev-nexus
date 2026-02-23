@@ -1,49 +1,62 @@
-
 class CourseModel {
   final String id;
   final String title;
-  final String channelTitle;
+  final String description;      
   final String thumbnail;
+  final String channelId;        
+  final String channelTitle;
+  final String publishedAt;       
 
   CourseModel({
     required this.id,
     required this.title,
-    required this.channelTitle,
+    required this.description,    
     required this.thumbnail,
+    required this.channelId,      
+    required this.channelTitle,
+    required this.publishedAt,    
   });
 
-  factory CourseModel.fromYoutube(Map<String, dynamic> json) {
-    final snippet = json['snippet'] ?? {};
-    final thumbnails = snippet['thumbnails'] ?? {};
-
-    String imageUrl = '';
-    if (thumbnails['high'] != null) {
-      imageUrl = thumbnails['high']['url'];
-    } else if (thumbnails['medium'] != null) {
-      imageUrl = thumbnails['medium']['url'];
-    } else if (thumbnails['default'] != null) {
-      imageUrl = thumbnails['default']['url'];
-    } else {
-      imageUrl = 'https://via.placeholder.com/480x270?text=No+Image';
-    }
-
+  
+  factory CourseModel.fromJson(Map<String, dynamic> json) {
     return CourseModel(
       id: json['id'] ?? '',
-      title: snippet['title'] ?? 'No Title',
-      channelTitle: snippet['channelTitle'] ?? 'Unknown Channel',
-      thumbnail: imageUrl,
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      thumbnail: json['thumbnail'] ?? '',
+      channelId: json['channelId'] ?? '',
+      channelTitle: json['channelTitle'] ?? '',
+      publishedAt: json['publishedAt'] ?? '',
     );
   }
-}
 
-class LanguageCategory {
-  final String name;
-  final String imagePath;
-  final String channelId;
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'thumbnail': thumbnail,
+      'channelId': channelId,
+      'channelTitle': channelTitle,
+      'publishedAt': publishedAt,
+    };
+  }
 
-  const LanguageCategory({
-    required this.name, 
-    required this.imagePath, 
-    required this.channelId,
-  });
+  
+  factory CourseModel.fromYouTubeItem(Map<String, dynamic> item) {
+    final snippet = item['snippet'] ?? {};
+    final resourceId = snippet['resourceId'] ?? {};
+    
+    return CourseModel(
+      id: resourceId['videoId'] ?? item['id'] ?? '',
+      title: snippet['title'] ?? 'بدون عنوان',
+      description: snippet['description'] ?? '',
+      thumbnail: snippet['thumbnails']?['high']?['url'] ?? 
+                 snippet['thumbnails']?['default']?['url'] ?? '',
+      channelId: snippet['channelId'] ?? '',
+      channelTitle: snippet['channelTitle'] ?? '',
+      publishedAt: snippet['publishedAt'] ?? '',
+    );
+  }
 }

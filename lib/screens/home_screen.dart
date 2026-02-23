@@ -20,9 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (user == null) return;
 
     final currentName = (user.displayName ?? '').trim();
-    if (currentName.isNotEmpty) return; // الاسم موجود خلاص
+    if (currentName.isNotEmpty) return; 
 
-    // توليد اسم تلقائي من الإيميل (قبل @)
+    
     final email = (user.email ?? '').trim();
     final generatedName = email.contains('@') ? email.split('@').first : 'User';
 
@@ -31,9 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
       await user.reload();
 
       if (!mounted) return;
-      setState(() {}); // عشان يحدث الاسم على الشاشة
+      setState(() {}); 
     } catch (_) {
-      // تجاهل الخطأ (بدون تغيير UI)
+      
     }
   }
 
@@ -81,11 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 80,
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 18,
                               offset: const Offset(0, 10),
                             ),
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 80,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF0FA3A1)
-                                          .withOpacity(0.1),
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Icon(
@@ -149,11 +149,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
+                            color: Colors.white.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
+                                color: Colors.black.withValues(alpha: 0.06),
                                 blurRadius: 12,
                                 offset: const Offset(0, 6),
                               ),
@@ -200,11 +200,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 22,
                           offset: const Offset(0, 12),
                         ),
@@ -229,8 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: user?.emailVerified == true
-                                    ? Colors.green.withOpacity(0.12)
-                                    : Colors.orange.withOpacity(0.12),
+                                    ? Colors.green.withValues(alpha: 0.12)
+                                    : Colors.orange.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
@@ -312,11 +312,11 @@ class _FeatureButton extends StatelessWidget {
       child: Container(
         height: 110,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95),
+          color: Colors.white.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 22,
               offset: const Offset(0, 12),
             ),
@@ -330,7 +330,7 @@ class _FeatureButton extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.10),
+                  color: accent.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(icon, size: 34, color: accent),
@@ -375,17 +375,17 @@ class _BgPattern extends StatelessWidget {
           Positioned(
             top: -70,
             right: -60,
-            child: _circle(200, const Color(0xFF0FA3A1).withOpacity(0.08)),
+            child: _circle(200, const Color(0xFF0FA3A1).withValues(alpha: 0.08)),
           ),
           Positioned(
             top: 160,
             left: -110,
-            child: _circle(240, Colors.black.withOpacity(0.035)),
+            child: _circle(240, Colors.black.withValues(alpha: 0.035)),
           ),
           Positioned(
             bottom: -100,
             right: -60,
-            child: _circle(260, const Color(0xFF0FA3A1).withOpacity(0.07)),
+            child: _circle(260, const Color(0xFF0FA3A1).withValues(alpha: 0.07)),
           ),
         ],
       ),

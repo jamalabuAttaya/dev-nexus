@@ -11,8 +11,8 @@ void main() async {
   );
 
   final app = Firebase.app();
-  debugPrint("🔥 Firebase projectId = ${app.options.projectId}");
-  debugPrint("🔥 Firebase appId     = ${app.options.appId}");
+  debugPrint(" Firebase projectId = ${app.options.projectId}");
+  debugPrint(" Firebase appId     = ${app.options.appId}");
 
   runApp(const DevNexusApp());
 }

@@ -57,21 +57,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final pass = _passwordController.text.trim();
       final name = _nameController.text.trim();
 
-      // ✅ Create account
+      
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: pass,
       );
 
-      // ✅ Save display name
+     
       await cred.user!.updateDisplayName(name);
 
-      // ✅ Force refresh (important on web)
+    
       await cred.user!.reload();
 
       result = "success";
     } on FirebaseAuthException catch (e) {
-      // ✅ Clear error messages
+     
       result = switch (e.code) {
         'email-already-in-use' => 'This email is already in use.',
         'invalid-email' => 'Invalid email address.',
@@ -89,13 +89,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (result == "success") {
       _showSnackBar("Account created successfully!");
-      Navigator.pushReplacementNamed(context, '/home'); // أو '/login'
+      Navigator.pushReplacementNamed(context, '/home'); 
     } else {
       _showSnackBar(result);
     }
   }
 
   void _showSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -123,7 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Card(
                     elevation: 28,
-                    shadowColor: Colors.black.withOpacity(0.25),
+                    shadowColor: Colors.black.withValues(alpha: 0.25), // ✅ تم التحديث
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(32),
                     ),
@@ -137,19 +138,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         children: [
                           Image.asset(
                             'assets/image/logo.png',
-                            height: 200,
+                            height: 150,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 Container(
                               height: 95,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1A2E44).withOpacity(0.1),
+                                color: const Color(0xFF1A2E44).withValues(alpha: 0.1), // ✅ تم التحديث
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
-                                Icons.person_add,
-                                color: Color(0xFF1A2E44),
-                                size: 50,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.person_add,
+                                  color: Color(0xFF1A2E44),
+                                  size: 50,
+                                ),
                               ),
                             ),
                           ),
@@ -231,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   child: const Text(
                                     "I agree to the Terms and Conditions",
                                     style: TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       color: Color(0xFF455A64),
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -268,7 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       "Sign Up",
                                       style: TextStyle(
                                         fontSize: 17,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -343,13 +346,13 @@ class _ElectronicThreadsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final mainPaint = Paint()
-      ..color = const Color(0xFF1A2E44).withOpacity(0.06)
+      ..color = const Color(0xFF1A2E44).withValues(alpha: 0.06) // ✅ تم التحديث
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     final accentPaint = Paint()
-      ..color = const Color(0xFF4DB6AC).withOpacity(0.08)
+      ..color = const Color(0xFF4DB6AC).withValues(alpha: 0.08) // ✅ تم التحديث
       ..strokeWidth = 1.6
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -368,18 +371,20 @@ class _ElectronicThreadsPainter extends CustomPainter {
       );
     }
 
+    
+    final random = math.Random(42); 
     for (int i = 0; i < 8; i++) {
       final path = Path()
         ..moveTo(
-          size.width * math.Random(i).nextDouble(),
+          size.width * random.nextDouble(),
           0,
         )
         ..cubicTo(
           size.width * 0.2,
-          size.height * math.Random(i + 2).nextDouble(),
+          size.height * random.nextDouble(),
           size.width * 0.8,
-          size.height * math.Random(i + 4).nextDouble(),
-          size.width * math.Random(i + 6).nextDouble(),
+          size.height * random.nextDouble(),
+          size.width * random.nextDouble(),
           size.height,
         );
 

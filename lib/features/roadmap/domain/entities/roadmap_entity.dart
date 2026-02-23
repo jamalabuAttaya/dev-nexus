@@ -22,7 +22,7 @@ class RoadmapEntity {
 
 class RoadmapNode {
   final String id;
-  final String label;
+  final String label; 
   final String description;
   final List<String> children;
   final String? resource;

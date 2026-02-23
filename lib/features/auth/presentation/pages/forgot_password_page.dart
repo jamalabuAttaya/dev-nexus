@@ -21,7 +21,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _sendResetLink() async {
     final email = _emailController.text.trim();
 
-    // 1️⃣ تحقق من الإيميل
+    
     if (email.isEmpty) {
       _showSnack("Please enter your email");
       return;
@@ -30,16 +30,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 2️⃣ إرسال الرابط من Firebase
+     
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       if (!mounted) return;
 
-      // 3️⃣ رسالة نجاح
+      
       _showSnack("Reset link sent! Check Inbox/Spam.");
 
-      // 4️⃣ هنا بالضبط 👇
-      Navigator.pop(context); // 🔥 هذا مكانها الصحيح
+     
+      Navigator.pop(context); 
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       _showSnack(e.message ?? "Failed to send reset email");
