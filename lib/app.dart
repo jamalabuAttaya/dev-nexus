@@ -9,6 +9,15 @@ import 'features/courses/presentation/pages/courses_page.dart';
 import 'features/library/presentation/pages/library_page.dart';
 import 'features/roadmap/presentation/pages/roadmaps_page.dart';
 
+import 'features/library/presentation/pages/languages/java_page.dart';
+import 'features/library/presentation/pages/languages/kotlin_page.dart';
+import 'features/library/presentation/pages/languages/python_page.dart';
+import 'features/library/presentation/pages/languages/dart_page.dart';
+import 'features/library/presentation/pages/languages/flutter_page.dart';
+import 'features/library/presentation/pages/languages/html_page.dart';
+import 'features/library/presentation/pages/languages/javascript_page.dart';
+import 'features/library/presentation/pages/languages/csharp_page.dart';
+
 class DevNexusApp extends StatelessWidget {
   const DevNexusApp({super.key});
 
@@ -25,9 +34,7 @@ class DevNexusApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Poppins',
       ),
-
       home: const SplashScreen(),
-      
       routes: {
         '/auth': (context) => const AuthWrapper(),
         '/login': (context) => const LoginScreen(),
@@ -37,8 +44,17 @@ class DevNexusApp extends StatelessWidget {
         '/courses': (context) => const CoursesPage(),
         '/library': (context) => const LibraryPage(),
         '/roadmaps': (context) => const RoadmapsPage(),
-      },
 
+        // ✅ أضف هذه
+        '/java': (context) => const JavaPage(),
+        '/kotlin': (context) => const KotlinPage(),
+        '/python': (context) => const PythonPage(),
+        '/dart': (context) => const DartPage(),
+        '/flutter': (context) => const FlutterPage(),
+        '/html': (context) => const HtmlPage(),
+        '/javascript': (context) => const JavaScriptPage(),
+        '/csharp': (context) => const CSharpPage(),
+      },
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/courses':
@@ -50,7 +66,7 @@ class DevNexusApp extends StatelessWidget {
           case '/home':
             return MaterialPageRoute(builder: (_) => const HomeScreen());
           default:
-            return MaterialPageRoute(builder: (_) => const SplashScreen());
+            return MaterialPageRoute(builder: (_) => const LibraryPage());
         }
       },
     );
@@ -113,7 +129,6 @@ class AuthLoadingScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                     
                       color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 25,
                       offset: const Offset(0, 15),
@@ -176,7 +191,6 @@ class AuthLoadingScreen extends StatelessWidget {
                   Text(
                     'Elevating Developers Worldwide',
                     style: TextStyle(
-                     
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
