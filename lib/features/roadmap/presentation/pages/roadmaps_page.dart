@@ -4,6 +4,7 @@ import '../../data/repositories/roadmap_repository_impl.dart';
 import '../../data/services/roadmap_api_service.dart';
 import '../../data/services/roadmap_local_service.dart';
 import '../../domain/entities/roadmap_summary_entity.dart';
+import 'package:dev_nexus/features/settings/presentation/pages/about_page.dart';
 
 class RoadmapsPage extends StatefulWidget {
   const RoadmapsPage({super.key});
@@ -27,6 +28,9 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     'Best Practices',
     'Project Ideas',
   ];
+
+  
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -75,9 +79,9 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
         'frontend', 'backend', 'full-stack', 'devops', 'devsecops',
         'data-analyst', 'ai-engineer', 'ai-data-scientist', 'data-engineer',
         'android', 'machine-learning', 'postgresql-dba', 'ios', 'blockchain',
-        'qa', 'software-architect', 'cybersecurity', 'ux-design',
+        'qa', 'software-architect', 'cyber-security', 'ux-design',
         'technical-writer', 'game-developer', 'server-side-game-developer',
-        'mlops', 'product-manager', 'engineering-manager', 'developer-relations',
+        'mlops', 'product-manager', 'engineering-manager', 'devrel',
         'bi-analyst', 'ai-red-teaming', 'api-design'
       ].contains(id)) {
         categorized['Role Based Roadmaps']!.add(roadmap);
@@ -122,13 +126,116 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     return categorized;
   }
 
+  
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: Container(
+        color: Colors.white,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+           
+            Container(
+              height: 120,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1976D2), Color(0xFF64B5F6)],
+                ),
+              ),
+              child: const Center(
+                child: Text(
+                  'Dev Nexus',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            
+            ListTile(
+              leading: const Icon(Icons.home_rounded, color: Color(0xFF1976D2)),
+              title: const Text('الرئيسية'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/home');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_circle_fill, color: Color(0xFF1976D2)),
+              title: const Text('الكورسات'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/courses');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.map_rounded, color: Color(0xFF1976D2)),
+              title: const Text('خرائط الطريق'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/roadmaps');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book_rounded, color: Color(0xFF1976D2)),
+              title: const Text('المكتبة'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/library');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.info_rounded, color: Color(0xFF1976D2)),
+              title: const Text('حول التطبيق'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AboutPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.share_rounded, color: Color(0xFF1976D2)),
+              title: const Text('مشاركة التطبيق'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('مشاركة التطبيق - قيد التطوير')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_rounded, color: Color(0xFF1976D2)),
+              title: const Text('تقييم التطبيق'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تقييم التطبيق - قيد التطوير')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, 
       backgroundColor: const Color(0xFFF8F9FA),
+      drawer: _buildDrawer(context),
       body: Column(
         children: [
-          _buildHeader(context),
+          _buildHeader(),
           Expanded(
             child: FutureBuilder<List<RoadmapSummaryEntity>>(
               future: _roadmapsFuture,
@@ -261,7 +368,8 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+ 
+  Widget _buildHeader() {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -282,9 +390,9 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Icon(Icons.search_rounded, color: Colors.white, size: 26),
-                  Text(
+                children: [
+                  const Icon(Icons.search_rounded, color: Colors.white, size: 26),
+                  const Text(
                     'Dev Nexus Academy',
                     style: TextStyle(
                       color: Colors.white,
@@ -292,7 +400,13 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Icon(Icons.menu_rounded, color: Colors.white, size: 26),
+                  IconButton(
+                    icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 26),
+                    onPressed: () {
+                      
+                      _scaffoldKey.currentState?.openDrawer();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -302,25 +416,22 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildNavIcon(
-                    context,
-                    icon: Icons.play_circle_fill,
-                    label: 'Courses',
-                    isActive: false,
-                    route: '/courses',
+                    Icons.play_circle_fill,
+                    'Courses',
+                    false,
+                    '/courses',
                   ),
                   _buildNavIcon(
-                    context,
-                    icon: Icons.map_rounded,
-                    label: 'Roadmaps',
-                    isActive: true,
-                    route: '/roadmaps',
+                    Icons.map_rounded,
+                    'Roadmaps',
+                    true,
+                    '/roadmaps',
                   ),
                   _buildNavIcon(
-                    context,
-                    icon: Icons.menu_book_rounded,
-                    label: 'Library',
-                    isActive: false,
-                    route: '/library',
+                    Icons.menu_book_rounded,
+                    'Library',
+                    false,
+                    '/library',
                   ),
                 ],
               ),
@@ -331,13 +442,8 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
     );
   }
 
-  Widget _buildNavIcon(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required String route,
-  }) {
+ 
+  Widget _buildNavIcon(IconData icon, String label, bool isActive, String route) {
     return GestureDetector(
       onTap: () {
         if (!isActive) {
@@ -459,14 +565,51 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
   }
 
   Future<void> _openRoadmapLink(String id) async {
-    final url = Uri.parse('https://roadmap.sh/$id');
+    String urlString;
+    
+    // خريطة الروابط الخاصة
+    switch (id) {
+      case 'cyber-security':
+        urlString = 'https://roadmap.sh/cyber-security';
+        break;
+      case 'devrel': 
+        urlString = 'https://roadmap.sh/devrel';
+        break;
+      case 'swift': 
+        urlString = 'https://roadmap.sh/swift-ui';
+        break;
+      case 'cpp':
+        urlString = 'https://roadmap.sh/cpp';
+        break;
+      case 'golang':
+        urlString = 'https://roadmap.sh/golang';
+        break;
+      case 'aspnet-core':
+        urlString = 'https://roadmap.sh/aspnet-core';
+        break;
+      case 'datastructures-and-algorithms':
+        urlString = 'https://roadmap.sh/datastructures-and-algorithms';
+        break;
+      case 'software-design-architecture':
+        urlString = 'https://roadmap.sh/software-design-architecture';
+        break;
+      case 'nextjs':
+        urlString = 'https://roadmap.sh/nextjs';
+        break;
+      default:
+        urlString = 'https://roadmap.sh/$id';
+    }
+    
+    debugPrint('🌐 Opening roadmap: $urlString');
+    
     try {
+      final url = Uri.parse(urlString);
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('لا يمكن فتح الرابط: $url'), backgroundColor: Colors.red),
+            SnackBar(content: Text('لا يمكن فتح الرابط'), backgroundColor: Colors.red),
           );
         }
       }
@@ -508,7 +651,7 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
       case 'blockchain': return const Color(0xFF3D3D3D);
       case 'qa': return Colors.indigo;
       case 'software-architect': return Colors.brown;
-      case 'cybersecurity': return Colors.red;
+      case 'cyber-security': return Colors.red; 
       case 'ux-design': return const Color(0xFFFF4081);
       case 'technical-writer': return Colors.blueGrey;
       case 'game-developer': return const Color(0xFFD32F2F);
@@ -516,7 +659,7 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
       case 'mlops': return const Color(0xFF00ACC1);
       case 'product-manager': return Colors.amber;
       case 'engineering-manager': return Colors.deepPurple;
-      case 'developer-relations': return Colors.lightBlue;
+      case 'devrel': return Colors.lightBlue;
       case 'bi-analyst': return const Color(0xFF2E7D32);
       case 'ai-red-teaming': return Colors.redAccent;
       case 'api-design': return Colors.deepOrange;
@@ -531,13 +674,13 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
       case 'python': return const Color(0xFF3776AB);
       case 'system-design': return Colors.brown;
       case 'java': return const Color(0xFF007396);
-      case 'asp.net-core': return const Color(0xFF512BD4);
+      case 'aspnet-core': return const Color(0xFF512BD4); 
       case 'spring-boot': return const Color(0xFF6DB33F);
       case 'flutter': return Colors.blue;
-      case 'c++': return const Color(0xFF00599C);
+      case 'cpp': return const Color(0xFF00599C); 
       case 'rust': return const Color(0xFFDEA584);
-      case 'go': return const Color(0xFF00ADD8);
-      case 'design-architecture': return Colors.pink;
+      case 'golang': return const Color(0xFF00ADD8); 
+      case 'software-design-architecture': return Colors.pink; 
       case 'graphql': return const Color(0xFFE10098);
       case 'react-native': return const Color(0xFF61DAFB);
       case 'design-system': return Colors.amber;
@@ -548,13 +691,13 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
       case 'docker': return const Color(0xFF2496ED);
       case 'aws': return const Color(0xFFFF9900);
       case 'terraform': return const Color(0xFF7B42BC);
-      case 'data-structures-algorithms': return Colors.blueGrey;
+      case 'datastructures-and-algorithms': return Colors.blueGrey; 
       case 'redis': return const Color(0xFFDC382D);
       case 'git-github': return Colors.black;
       case 'php': return const Color(0xFF777BB4);
       case 'cloudflare': return const Color(0xFFF38020);
       case 'ai-agents': return const Color(0xFF9C27B0);
-      case 'next.js': return Colors.black;
+      case 'nextjs': return Colors.black;
       case 'kotlin': return const Color(0xFF7F52FF);
       case 'html': return const Color(0xFFE34F26);
       case 'css': return const Color(0xFF1572B6);
@@ -601,7 +744,7 @@ class _RoadmapsPageState extends State<RoadmapsPage> {
       case 'docker': return Icons.cloud_rounded;
       case 'kubernetes': return Icons.cloud_rounded;
       case 'aws': return Icons.cloud_rounded;
-      case 'cybersecurity': return Icons.security_rounded;
+      case 'cyber-security': return Icons.security_rounded; 
       case 'ai-engineer': return Icons.psychology_rounded;
       case 'machine-learning': return Icons.psychology_rounded;
       case 'data-analyst': return Icons.analytics_rounded;

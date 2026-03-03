@@ -15,7 +15,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
   @override
   void initState() {
     super.initState();
-    // استخراج ID قائمة التشغيل أو الفيديو من الرابط
+    
     String? videoId = YoutubePlayer.convertUrlToId(widget.playlistUrl);
     
     _controller = YoutubePlayerController(
@@ -43,7 +43,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
               handleColor: Colors.amberAccent,
             ),
           ),
-          // هنا يمكنك إضافة قائمة الدروس أسفل الفيديو
+         
         ],
       ),
     );
